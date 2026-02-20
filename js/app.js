@@ -125,7 +125,8 @@ async function saveConfig() {
     }
     errEl.innerHTML = '连接失败：' + msg;
     errEl.style.display = 'block';
-    GitHubAPI.clearConfig();
+    // Do NOT clear config here so user can correct it
+    // GitHubAPI.clearConfig(); 
   } finally {
     btn.disabled = false;
     btn.innerHTML = '<i class="fa-solid fa-check"></i> 保存并连接';

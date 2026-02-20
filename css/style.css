@@ -38,8 +38,76 @@ body {
   line-height: 1.5;
 }
 a { text-decoration: none; color: inherit; cursor: pointer; }
-button { cursor: pointer; border: none; outline: none; background: none; font: inherit; }
+button { cursor: pointer; border: none; outline: none; background: none; font: inherit; transition: all var(--transition); }
 input { outline: none; font: inherit; }
+
+/* ─── Buttons 2.0 ─── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  letter-spacing: 0.3px;
+}
+.btn:active { transform: scale(0.96); }
+
+/* Primary Button (Blue Gradient) */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 102, 255, 0.25);
+  border: 1px solid transparent;
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0, 102, 255, 0.35);
+  filter: brightness(1.08);
+
+}
+.btn-secondary {
+  background: #fff;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+}
+.btn-secondary:hover {
+  color: var(--primary);
+  border-color: var(--primary-muted);
+  background: var(--bg);
+}
+
+.btn-danger {
+  background: #fff5f5;
+  color: #ff4d4f;
+  border: 1px solid rgba(255,77,79,0.1);
+}
+.btn-danger:hover {
+  background: #ffe8e8;
+  border-color: rgba(255,77,79,0.3);
+  box-shadow: 0 2px 8px rgba(255,77,79,0.15);
+}
+
+/* Icon Button (Circle) */
+.btn-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: background 0.2s, color 0.2s;
+}
+.btn-icon:hover {
+  background: rgba(0,0,0,0.04);
+  color: var(--primary);
+}
 
 /* ─── SCROLLBAR ─── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
