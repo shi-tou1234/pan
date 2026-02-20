@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pan - 网盘</title>
+  <title>cmchen的网盘</title>
   <link rel="stylesheet" href="css/style.css" />
   <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -17,7 +17,7 @@
   <div class="modal-box setup-box">
     <div class="setup-logo">
       <i class="fa-solid fa-cloud"></i>
-      <span>Pan 网盘</span>
+      <span>cmchen的网盘</span>
     </div>
     <h2>配置存储</h2>
     <p class="setup-desc">本网盘使用 GitHub 仓库作为存储后端，请填写以下信息完成初始化。</p>
@@ -54,6 +54,11 @@
       <label>存储目录 <span class="tip">（文件存放到仓库的哪个目录，默认 files）</span></label>
       <input type="text" id="cfg-dir" placeholder="files" value="files" />
     </div>
+    <div class="form-group">
+      <label class="select-all-wrap" style="margin-top:8px">
+        <input type="checkbox" id="cfg-proxy" checked /> 开启 CDN 加速（仅限公开仓库，极大提升预览速度）
+      </label>
+    </div>
     <div id="setup-error" class="setup-error" style="display:none"></div>
     <div class="setup-actions">
       <button class="btn btn-primary btn-full" id="setup-save-btn" onclick="saveConfig()">
@@ -73,7 +78,7 @@
   <aside class="sidebar">
     <div class="sidebar-logo" onclick="goHome()">
       <i class="fa-solid fa-cloud"></i>
-      <span>Pan 网盘</span>
+      <span>cmchen的网盘</span>
     </div>
 
     <div class="sidebar-upload">
@@ -273,6 +278,11 @@
     <div class="form-group">
       <label>存储目录</label>
       <input type="text" id="s-dir" />
+    </div>
+    <div class="form-group">
+      <label class="select-all-wrap">
+        <input type="checkbox" id="s-proxy" /> 开启 CDN 加速（仅限公开仓库）
+      </label>
     </div>
     <div class="modal-actions">
       <button class="btn" onclick="closeSettings()">取消</button>

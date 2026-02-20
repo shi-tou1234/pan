@@ -80,6 +80,7 @@ async function saveConfig() {
     repo:   document.getElementById('cfg-repo').value.trim(),
     branch: document.getElementById('cfg-branch').value.trim() || 'main',
     dir:    document.getElementById('cfg-dir').value.trim() || 'files',
+    useProxy: document.getElementById('cfg-proxy').checked,
   };
 
   if (!cfg.token || !cfg.owner || !cfg.repo) {
@@ -154,6 +155,7 @@ function openSettings() {
   document.getElementById('s-repo').value   = cfg.repo   || '';
   document.getElementById('s-branch').value = cfg.branch || 'main';
   document.getElementById('s-dir').value    = cfg.dir    || 'files';
+  document.getElementById('s-proxy').checked = cfg.useProxy !== false;
   document.getElementById('settings-modal').style.display = 'flex';
 }
 function closeSettings() { document.getElementById('settings-modal').style.display = 'none'; }
@@ -164,6 +166,7 @@ async function saveSettings() {
     repo:   document.getElementById('s-repo').value.trim(),
     branch: document.getElementById('s-branch').value.trim() || 'main',
     dir:    document.getElementById('s-dir').value.trim() || 'files',
+    useProxy: document.getElementById('s-proxy').checked,
   };
   if (!cfg.token || !cfg.owner || !cfg.repo) { showToast('请填写所有必填字段', 'warning'); return; }
   GitHubAPI.setConfig(cfg);
@@ -367,10 +370,62 @@ function createFileCard(item, idx) {
     showContextMenu(e, item.name);
   });
 
+  // Drag and Drop
+  card.draggable = true;
+  card.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('text/plain', item.name);
+    e.dataTransfer.effectAllowed = 'move';
+    card.classList.add('dragging');
+  });
+  card.addEventListener('dragend', e => {
+    card.classList.remove('dragging');
+  });
+
+  if (isFolder) {
+    card.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      card.classList.add('drag-over-folder');
+    });
+    card.addEventListener('dragleave', e => {
+      card.classList.remove('drag-over-folder');
+    });
+    card.addEventListener('drop', async e => {
+      e.preventDefault();
+      card.classList.remove('drag-over-folder');
+      const draggedName = e.dataTransfer.getData('text/plain');
+      if (!draggedName || draggedName === item.name) return;
+      
+      await handleMoveItem(draggedName, item.name);
+    });
+  }
+
   return card;
 }
 
 // ─── Navigation ───────────────────────────────────
+async function handleMoveItem(draggedName, targetFolderName) {
+  const draggedItem = state.files.find(f => f.name === draggedName);
+  if (!draggedItem) return;
+
+  const oldPath = state.currentPath ? `${state.currentPath}/${draggedName}` : draggedName;
+  const newPath = state.currentPath ? `${state.currentPath}/${targetFolderName}/${draggedName}` : `${targetFolderName}/${draggedName}`;
+
+  showToast(`正在移动 ${draggedName} 到 ${targetFolderName}...`, 'info');
+  try {
+    if (draggedItem.type === 'dir') {
+      await GitHubAPI.moveFolder(oldPath, newPath);
+    } else {
+      await GitHubAPI.moveFile(oldPath, newPath);
+    }
+    showToast('移动成功', 'success');
+    loadFiles();
+  } catch (err) {
+    console.error(err);
+    showToast('移动失败: ' + err.message, 'error');
+  }
+}
+
 function openItem(item) {
   if (item.type === 'dir') {
     openFolder(item);

@@ -1,4 +1,4 @@
-# Pan 网盘 🗂️
+# cmchen的网盘 🗂️
 
 > 部署在 GitHub Pages 上的网盘，主题仿夸克网盘，使用 GitHub 仓库作为存储后端。
 

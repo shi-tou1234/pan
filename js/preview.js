@@ -120,8 +120,13 @@ const Preview = (() => {
     body.innerHTML = `<div class="preview-loading"><div class="spinner"></div></div>`;
 
     const type = getType(item.name);
-    const downloadUrl = item.download_url;
+    let downloadUrl = item.download_url;
     const cfg = GitHubAPI.getConfig();
+
+    // Apply CDN proxy if enabled and it's a public repo (no token in URL)
+    if (cfg && cfg.useProxy && downloadUrl && !downloadUrl.includes('?token=')) {
+      downloadUrl = 'https://ghproxy.net/' + downloadUrl;
+    }
 
     try {
       if (type === 'image') {
@@ -133,9 +138,9 @@ const Preview = (() => {
       } else if (type === 'pdf') {
         renderPDF(body, downloadUrl, cfg);
       } else if (type === 'word' || type === 'ppt') {
-        renderOffice(body, item);
+        renderOffice(body, { ...item, download_url: downloadUrl });
       } else if (type === 'excel') {
-        renderOffice(body, item);
+        renderOffice(body, { ...item, download_url: downloadUrl });
       } else if (type === 'md') {
         await renderMarkdown(body, downloadUrl, cfg);
       } else if (type === 'code' || type === 'text') {
@@ -153,14 +158,13 @@ const Preview = (() => {
 
   // ─── Image ───────────────────────────────────────
   async function renderImage(body, url, cfg) {
-    const proxyUrl = proxyTokenUrl(url, cfg);
     return new Promise(resolve => {
       const wrap = document.createElement('div');
       wrap.className = 'preview-image-wrap';
       const img = document.createElement('img');
       img.onload = () => { body.innerHTML = ''; body.appendChild(wrap); resolve(); };
       img.onerror = () => { body.innerHTML = ''; body.appendChild(wrap); resolve(); };
-      img.src = proxyUrl;
+      img.src = url;
       img.alt = 'preview';
       img.onclick = () => img.classList.toggle('zoomed');
       wrap.appendChild(img);
@@ -340,14 +344,6 @@ const Preview = (() => {
         <i class="fa-solid fa-download"></i> 下载文件
       </button>`;
     body.appendChild(wrap);
-  }
-
-  // ─── Helper: proxy URL with token via fetch ───────
-  function proxyTokenUrl(url, cfg) {
-    // For public repos, direct URL works
-    // For private repos, we need to use Authorization header (can't do in img src)
-    // We create an object URL via fetch
-    return url; // handled via fetchRawArrayBuffer for private
   }
 
   return {

@@ -141,32 +141,38 @@ const GitHubAPI = (() => {
     return request('GET', contentsPath(path) + `?ref=${cfg.branch}`);
   }
 
-  // ─── Rename file (copy + delete) ─────────────────
-  async function renameFile(oldPath, newName) {
-    // Fetch original content
+  // ─── Move file (copy + delete) ─────────────────
+  async function moveFile(oldPath, newPath) {
     const cfg = getConfig();
     const info = await getFileInfo(oldPath);
-    if (info.type !== 'file') throw new Error('只支持重命名文件（非文件夹）');
+    if (info.type !== 'file') throw new Error('只支持移动文件（非文件夹）');
 
-    // Determine new path
-    const parts = oldPath.split('/');
-    parts[parts.length - 1] = newName;
-    const newPath = parts.join('/');
-
-    // Decode content (base64)
     const content = info.content; // already base64 from API
     const cleanB64 = content.replace(/\n/g, '');
 
-    // Upload with new name
     await request('PUT', contentsPath(newPath), {
-      message: `Rename ${oldPath} → ${newPath} via Pan`,
+      message: `Move ${oldPath} → ${newPath} via Pan`,
       content: cleanB64,
       branch: cfg.branch,
     });
 
-    // Delete old file
     await deleteFile(oldPath, info.sha);
     return newPath;
+  }
+
+  // ─── Rename file (copy + delete) ─────────────────
+  async function renameFile(oldPath, newName) {
+    const parts = oldPath.split('/');
+    parts[parts.length - 1] = newName;
+    const newPath = parts.join('/');
+    return moveFile(oldPath, newPath);
+  }
+
+  // ─── Move folder (recursive copy + delete) ─────
+  async function moveFolder(oldFolderPath, newFolderPath) {
+    await copyDir(oldFolderPath, newFolderPath);
+    await deleteDir(oldFolderPath);
+    return newFolderPath;
   }
 
   // ─── Rename folder (recursive copy + delete) ─────
@@ -174,10 +180,7 @@ const GitHubAPI = (() => {
     const parts = oldFolderPath.replace(/\/$/, '').split('/');
     parts[parts.length - 1] = newName;
     const newFolderPath = parts.join('/');
-
-    await copyDir(oldFolderPath, newFolderPath);
-    await deleteDir(oldFolderPath);
-    return newFolderPath;
+    return moveFolder(oldFolderPath, newFolderPath);
   }
 
   async function copyDir(srcPath, destPath) {
@@ -267,18 +270,22 @@ const GitHubAPI = (() => {
   // ─── Fetch raw file content (text) ───────────────
   async function fetchRawText(downloadUrl) {
     const cfg = getConfig();
-    const res = await fetch(downloadUrl, {
-      headers: { 'Authorization': `token ${cfg.token}` },
-    });
+    const headers = {};
+    if (!downloadUrl.includes('ghproxy.net') && cfg.token) {
+      headers['Authorization'] = `Bearer ${cfg.token}`;
+    }
+    const res = await fetch(downloadUrl, { headers });
     if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
     return res.text();
   }
 
   async function fetchRawArrayBuffer(downloadUrl) {
     const cfg = getConfig();
-    const res = await fetch(downloadUrl, {
-      headers: { 'Authorization': `token ${cfg.token}` },
-    });
+    const headers = {};
+    if (!downloadUrl.includes('ghproxy.net') && cfg.token) {
+      headers['Authorization'] = `Bearer ${cfg.token}`;
+    }
+    const res = await fetch(downloadUrl, { headers });
     if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
     return res.arrayBuffer();
   }
@@ -306,6 +313,8 @@ const GitHubAPI = (() => {
     getFileInfo,
     renameFile,
     renameFolder,
+    moveFile,
+    moveFolder,
     getRepoInfo,
     fetchRawText,
     fetchRawArrayBuffer,
