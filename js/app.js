@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadFiles();
   } else {
     document.getElementById('setup-modal').style.display = 'flex';
+    autoFillSetupForm();
   }
 
   // Drag and drop
@@ -39,6 +40,33 @@ document.addEventListener('DOMContentLoaded', () => {
   // Keyboard
   document.addEventListener('keydown', handleKeyDown);
 });
+
+// ─── Auto-fill setup form from GitHub Pages URL ───
+function autoFillSetupForm() {
+  // GitHub Pages URL pattern: https://{owner}.github.io/{repo}/
+  const hostname = location.hostname; // e.g. "shi-tou1234.github.io"
+  const pathname = location.pathname; // e.g. "/pan/"
+
+  const hostMatch = hostname.match(/^([a-zA-Z0-9\-]+)\.github\.io$/);
+  if (hostMatch) {
+    const owner = hostMatch[1];
+    const repoMatch = pathname.match(/^\/([^/]+)/);
+    const repo = repoMatch ? repoMatch[1] : '';
+
+    const ownerEl = document.getElementById('cfg-owner');
+    const repoEl  = document.getElementById('cfg-repo');
+    const hintEl  = document.getElementById('repo-hint');
+
+    if (ownerEl && !ownerEl.value) ownerEl.value = owner;
+    if (repoEl  && !repoEl.value && repo) {
+      repoEl.value = repo;
+      if (hintEl) {
+        hintEl.textContent = `已从当前网址自动推断：${owner}/${repo}`;
+        hintEl.style.display = 'block';
+      }
+    }
+  }
+}
 
 // ─── Setup / Config ───────────────────────────────
 async function saveConfig() {
@@ -84,7 +112,13 @@ async function saveConfig() {
     if (msg === 'Bad credentials') {
       msg = 'Token 无效或已过期，请重新 <a href="https://github.com/settings/tokens/new?scopes=repo&description=Pan%E7%BD%91%E7%9B%98" target="_blank" style="color:#1677ff;text-decoration:underline">生成 Token</a>（需勾选 <b>repo</b> 权限）';
     } else if (msg === 'Not Found') {
-      msg = '仓库不存在，请检查仓库所有者和仓库名称是否正确，以及 Token 是否有该仓库的访问权限';
+      const { owner, repo } = cfg;
+      msg = `仓库 <b>${owner}/${repo}</b> 不存在或无权限访问。请确认：<ul style="margin:.5em 0 0 1.2em;line-height:1.9">
+        <li>仓库所有者填写的是 <b>GitHub 用户名</b>（非邮箱、非昵称）</li>
+        <li>仓库名称与 GitHub 上显示的<b>完全一致</b>（区分大小写）</li>
+        <li>若仓库为 <b>Private</b>，Token 需在 <b>Repository access</b> 中选中该仓库</li>
+        <li><a href="https://github.com/${owner}/${repo}" target="_blank" style="color:#1677ff">点此验证仓库是否存在</a></li>
+      </ul>`;
     } else if (msg.toLowerCase().includes('rate limit')) {
       msg = 'API 请求超出频率限制，请稍后重试';
     }

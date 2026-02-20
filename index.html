@@ -21,27 +21,37 @@
     </div>
     <h2>配置存储</h2>
     <p class="setup-desc">本网盘使用 GitHub 仓库作为存储后端，请填写以下信息完成初始化。</p>
+
+    <div class="setup-tip-box">
+      <i class="fa-solid fa-circle-info"></i>
+      <div>
+        <b>仓库所有者</b> 即 GitHub 用户名，<b>仓库名称</b> 即存放文件的仓库名。<br>
+        如当前网址是 <code>shi-tou1234.github.io/pan</code>，则所有者填 <code>shi-tou1234</code>，仓库填 <code>pan</code>。
+      </div>
+    </div>
+
     <div class="form-group">
-      <label>GitHub Token <span class="tip">（需要 repo 权限）</span></label>
+      <label>GitHub Token <span class="tip">（Classic token，需勾选 repo 权限）</span></label>
       <div class="input-wrap">
         <input type="password" id="cfg-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" />
         <button class="btn-toggle-pwd" onclick="togglePwd('cfg-token')"><i class="fa-regular fa-eye"></i></button>
       </div>
     </div>
     <div class="form-group">
-      <label>仓库所有者 <span class="tip">（用户名或组织名）</span></label>
-      <input type="text" id="cfg-owner" placeholder="your-username" />
+      <label>仓库所有者 <span class="tip">（GitHub 用户名）</span></label>
+      <input type="text" id="cfg-owner" placeholder="your-username" autocomplete="off" spellcheck="false" />
     </div>
     <div class="form-group">
-      <label>仓库名称</label>
-      <input type="text" id="cfg-repo" placeholder="my-pan" />
+      <label>仓库名称 <span class="tip">（区分大小写）</span></label>
+      <input type="text" id="cfg-repo" placeholder="pan" autocomplete="off" spellcheck="false" />
+      <div class="field-hint" id="repo-hint" style="display:none"></div>
     </div>
     <div class="form-group">
       <label>分支 <span class="tip">（默认 main）</span></label>
       <input type="text" id="cfg-branch" placeholder="main" value="main" />
     </div>
     <div class="form-group">
-      <label>存储目录 <span class="tip">（默认 files）</span></label>
+      <label>存储目录 <span class="tip">（文件存放到仓库的哪个目录，默认 files）</span></label>
       <input type="text" id="cfg-dir" placeholder="files" value="files" />
     </div>
     <div id="setup-error" class="setup-error" style="display:none"></div>
@@ -51,7 +61,7 @@
       </button>
     </div>
     <a class="setup-help" href="https://github.com/settings/tokens/new?scopes=repo&description=Pan%E7%BD%91%E7%9B%98" target="_blank">
-      <i class="fa-solid fa-key"></i> 生成 GitHub Token
+      <i class="fa-solid fa-key"></i> 生成 GitHub Classic Token（勾选 repo）
     </a>
   </div>
 </div>
