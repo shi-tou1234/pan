@@ -60,6 +60,16 @@ async function saveConfig() {
     return;
   }
 
+  // Token 格式基础校验
+  if (!cfg.token.startsWith('ghp_') &&
+      !cfg.token.startsWith('github_pat_') &&
+      !cfg.token.startsWith('gho_') &&
+      !cfg.token.startsWith('ghu_')) {
+    errEl.innerHTML = 'Token 格式不正确，请确保完整复制 GitHub Token（以 <b>ghp_</b> 或 <b>github_pat_</b> 开头）';
+    errEl.style.display = 'block';
+    return;
+  }
+
   btn.disabled = true;
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 连接中...';
 
@@ -70,7 +80,15 @@ async function saveConfig() {
     showApp();
     await loadFiles();
   } catch (e) {
-    errEl.textContent = '连接失败：' + e.message;
+    let msg = e.message;
+    if (msg === 'Bad credentials') {
+      msg = 'Token 无效或已过期，请重新 <a href="https://github.com/settings/tokens/new?scopes=repo&description=Pan%E7%BD%91%E7%9B%98" target="_blank" style="color:#1677ff;text-decoration:underline">生成 Token</a>（需勾选 <b>repo</b> 权限）';
+    } else if (msg === 'Not Found') {
+      msg = '仓库不存在，请检查仓库所有者和仓库名称是否正确，以及 Token 是否有该仓库的访问权限';
+    } else if (msg.toLowerCase().includes('rate limit')) {
+      msg = 'API 请求超出频率限制，请稍后重试';
+    }
+    errEl.innerHTML = '连接失败：' + msg;
     errEl.style.display = 'block';
     GitHubAPI.clearConfig();
   } finally {

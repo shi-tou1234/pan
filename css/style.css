@@ -670,7 +670,10 @@ input { outline: none; font: inherit; }
   color: var(--danger);
   font-size: 13px;
   margin-bottom: 16px;
+  line-height: 1.7;
 }
+.setup-error a { color: var(--primary); text-decoration: underline; }
+.setup-error b { font-weight: 600; }
 .setup-actions { margin-top: 4px; }
 .setup-help {
   display: flex;

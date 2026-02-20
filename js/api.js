@@ -24,7 +24,7 @@ const GitHubAPI = (() => {
     if (!cfg) throw new Error('未配置 GitHub 凭证');
 
     const headers = {
-      'Authorization': `token ${cfg.token}`,
+      'Authorization': `Bearer ${cfg.token}`,
       'Accept': 'application/vnd.github+json',
       'X-GitHub-Api-Version': '2022-11-28',
     };
